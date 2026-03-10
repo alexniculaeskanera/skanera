@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Skanera — Smart Storage Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#0f0f11;--surface:#18181c;--surface2:#222228;--border:#2e2e38;--accent:#f5c842;--accent2:#e8855a;--text:#f0eff4;--text-muted:#7e7d8f;--success:#4caf82;--radius:14px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden;}
+
+/* ONBOARDING */
+.ob-overlay{position:fixed;inset:0;background:#000d;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:3000;padding:20px;transition:opacity 0.4s;}
+.ob-overlay.hidden{opacity:0;pointer-events:none;}
+.ob-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 30px 80px #000a;}
+.ob-track{overflow:hidden;}
+.ob-steps{display:flex;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);}
+.ob-step{min-width:100%;padding:38px 34px;}
+.ob-icon{font-size:52px;margin-bottom:16px;}
+.ob-step h2{font-family:"Syne",sans-serif;font-size:22px;font-weight:800;margin-bottom:9px;letter-spacing:-0.5px;}
+.ob-step p{color:var(--text-muted);font-size:14px;line-height:1.65;margin-bottom:26px;}
+.ob-dots{display:flex;gap:6px;margin-bottom:22px;}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all 0.2s;}
+.ob-dot.active{background:var(--accent);width:20px;border-radius:4px;}
+.ob-actions{display:flex;justify-content:space-between;align-items:center;}
+.ob-skip{background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:8px;font-family:"DM Sans",sans-serif;}
+.ob-skip:hover{color:var(--text);}
+.ob-next{background:var(--accent);color:#111;border:none;padding:11px 24px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s;}
+.ob-next:hover{background:#ffd84d;transform:translateY(-1px);}
+
+/* DEMO BANNER */
+.demo-banner{background:linear-gradient(90deg,#7c6bff22,#f5c84222);border-bottom:1px solid #7c6bff44;padding:9px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.demo-badge{background:#7c6bff33;border:1px solid #7c6bff55;color:#a89bff;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.demo-banner-text{font-size:12px;color:#a89bff;display:flex;align-items:center;gap:8px;}
+.demo-steps{display:flex;gap:7px;flex-wrap:wrap;}
+.demo-step-btn{background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.25);color:var(--accent);font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s;white-space:nowrap;}
+.demo-step-btn:hover,.demo-step-btn.active{background:var(--accent);color:#111;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{font-family:"Syne",sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.5px;}
+.logo span{color:var(--accent);}
+.topbar-actions{display:flex;gap:7px;align-items:center;}
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:500;transition:all 0.15s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#111;}
+.btn-primary:hover{background:#ffd84d;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{padding:6px 11px;font-size:12px;}
+
+/* SEARCH */
+.search-bar{padding:11px 18px;background:var(--surface);border-bottom:1px solid var(--border);}
+.search-wrap{max-width:700px;margin:0 auto;position:relative;}
+.search-wrap input{width:100%;padding:10px 42px 10px 15px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;}
+.search-wrap input:focus{border-color:var(--accent);}
+.search-icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:16px;pointer-events:none;}
+.search-results{position:absolute;top:110%;left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;z-index:200;overflow:hidden;box-shadow:0 12px 40px #0009;}
+.search-result-item{padding:11px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid var(--border);}
+.search-result-item:last-child{border-bottom:none;}
+.search-result-item:hover{background:var(--surface2);}
+.sr-info{flex:1;}
+.sr-item-name{font-weight:500;font-size:13px;}
+.sr-box{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.sr-location{font-size:11px;color:var(--accent);font-weight:500;}
+.no-results{padding:18px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+/* LAYOUT */
+.main{display:flex;min-height:calc(100vh - 115px);}
+.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;}
+.sidebar h3{font-family:"Syne",sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:9px;padding:0 7px;}
+.location-item{padding:8px 9px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:7px;transition:all 0.15s;margin-bottom:2px;}
+.location-item:hover{background:var(--surface2);color:var(--text);}
+.location-item.active{background:var(--accent)22;color:var(--accent);}
+.location-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.add-location-btn{margin-top:7px;width:100%;text-align:left;padding:7px 9px;background:none;border:1px dashed var(--border);border-radius:8px;color:var(--text-muted);font-size:12px;cursor:pointer;transition:all 0.15s;}
+.add-location-btn:hover{border-color:var(--accent);color:var(--accent);}
+.content{flex:1;padding:18px;overflow-y:auto;}
+.content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:9px;}
+.content-header h2{font-family:"Syne",sans-serif;font-size:17px;font-weight:700;}
+.boxes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;}
+
+/* BOX CARD */
+.box-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all 0.2s;cursor:pointer;}
+.box-card:hover{border-color:var(--accent)88;transform:translateY(-2px);box-shadow:0 8px 32px #0008;}
+.box-card-header{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:7px;}
+.box-name{font-family:"Syne",sans-serif;font-weight:700;font-size:14px;}
+.box-location{font-size:11px;color:var(--text-muted);margin-top:3px;}
+.location-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;background:var(--surface2);color:var(--text-muted);white-space:nowrap;}
+.box-items-preview{padding:11px 13px;display:flex;flex-wrap:wrap;gap:5px;}
+.item-chip{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--surface2);color:var(--text-muted);display:flex;align-items:center;gap:4px;}
+.box-card-footer{padding:8px 13px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.item-count{font-size:11px;color:var(--text-muted);}
+.qr-btn{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:5px;transition:background 0.15s;}
+.qr-btn:hover{background:var(--accent)22;}
+
+/* STATS */
+.stats-row{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 16px;flex:1;min-width:95px;}
+.stat-num{font-family:"Syne",sans-serif;font-size:24px;font-weight:800;color:var(--accent);}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:1px;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:65px 20px;color:var(--text-muted);}
+.empty-icon{font-size:52px;margin-bottom:13px;}
+.empty-state h3{font-family:"Syne",sans-serif;font-size:16px;color:var(--text);margin-bottom:7px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:#000a;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:15px;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;transform:translateY(20px);transition:transform 0.2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:10;}
+.modal-header h3{font-family:"Syne",sans-serif;font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;color:var(--text-muted);font-size:21px;cursor:pointer;line-height:1;padding:2px 5px;border-radius:5px;}
+.modal-close:hover{background:var(--surface2);color:var(--text);}
+.modal-body{padding:20px;}
+.modal-footer{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;}
+
+/* FORM */
+.form-group{margin-bottom:16px;}
+label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:5px;letter-spacing:0.5px;text-transform:uppercase;}
+input[type="text"],select,textarea{width:100%;padding:9px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;}
+input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+
+/* PHOTO UPLOAD */
+.photo-upload{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.photo-upload:hover{border-color:var(--accent);background:var(--accent)08;}
+.photo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.photo-upload-icon{font-size:30px;margin-bottom:7px;}
+.photo-upload p{color:var(--text-muted);font-size:12px;}
+.photo-upload p strong{color:var(--accent);}
+
+/* ITEMS LIST */
+.items-list{display:flex;flex-direction:column;gap:6px;margin-top:9px;}
+.item-row{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:9px;padding:8px 10px;border:1px solid var(--border);}
+.item-row-thumb{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--border);}
+.item-row-ai{font-size:9px;color:var(--accent);background:var(--accent)18;padding:2px 5px;border-radius:20px;white-space:nowrap;}
+.remove-item{background:none;border:none;color:var(--text-muted);font-size:16px;cursor:pointer;padding:2px 4px;border-radius:4px;flex-shrink:0;}
+.remove-item:hover{background:#e8705a22;color:#e8705a;}
+
+/* AI STATUS */
+.ai-analyzing{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--accent);padding:9px 13px;background:var(--accent)10;border-radius:9px;margin:9px 0;}
+.spinner{width:14px;height:14px;border:2px solid var(--accent)44;border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* QR */
+.qr-container{text-align:center;padding:8px 0;}
+.qr-box{display:inline-block;background:white;padding:16px;border-radius:12px;margin:12px 0;}
+.qr-info{font-size:13px;color:var(--text-muted);margin-bottom:12px;}
+.qr-print-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--accent);color:#111;border:none;border-radius:9px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:13px;transition:all 0.15s;}
+.qr-print-btn:hover{background:#ffd84d;transform:translateY(-1px);}
+
+/* BOX DETAIL */
+.box-detail-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:9px;margin-top:12px;}
+.detail-item{background:var(--surface2);border-radius:10px;overflow:hidden;border:1px solid var(--border);transition:all 0.15s;}
+.detail-item:hover{border-color:var(--accent)66;transform:translateY(-1px);}
+.detail-item img{width:100%;height:76px;object-fit:cover;display:block;}
+.detail-item-name{padding:6px;font-size:11px;text-align:center;line-height:1.3;}
+
+/* SHARE */
+.share-link-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;gap:9px;align-items:center;margin-top:14px;}
+.share-link-box input{flex:1;background:none;border:none;color:var(--accent);font-size:12px;outline:none;font-family:"DM Sans",sans-serif;}
+.share-copy-btn{background:var(--accent);color:#111;border:none;padding:6px 13px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap;font-family:"DM Sans",sans-serif;transition:all 0.15s;}
+.share-copy-btn:hover{background:#ffd84d;}
+
+/* REPORT */
+.report-preview{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:14px;}
+.report-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.report-title{font-family:"Syne",sans-serif;font-size:15px;font-weight:700;}
+.report-date{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.report-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:7px;margin-top:12px;}
+.report-item-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)55;font-size:12px;}
+.report-item-row:last-child{border-bottom:none;}
+.report-total{display:flex;justify-content:space-between;align-items:center;padding:10px 0 0;font-weight:700;font-size:14px;}
+.report-print-btn{display:flex;align-items:center;gap:7px;width:100%;justify-content:center;padding:11px;background:var(--accent);color:#111;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:"DM Sans",sans-serif;margin-top:14px;transition:all 0.15s;}
+.report-print-btn:hover{background:#ffd84d;transform:translateY(-1px);}
+.divider-line{height:1px;background:var(--border);margin:12px 0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;right:18px;z-index:2000;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--success);padding:11px 16px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(9px);transition:all 0.25s;pointer-events:none;max-width:270px;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* MOBILE NAV */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;background:var(--surface);border-top:1px solid var(--border);padding:7px 0 max(7px,env(safe-area-inset-bottom));}
+.mobile-nav-inner{display:flex;justify-content:space-around;}
+.mob-nav-btn{background:none;border:none;color:var(--text-muted);font-size:9px;font-weight:600;cursor:pointer;padding:5px 10px;border-radius:9px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all 0.15s;font-family:"DM Sans",sans-serif;letter-spacing:0.3px;}
+.mob-nav-btn .nav-icon{font-size:19px;}
+.mob-nav-btn.active,.mob-nav-btn:hover{color:var(--accent);}
+
+@media(max-width:640px){
+  .sidebar{display:none;}
+  .boxes-grid{grid-template-columns:1fr;}
+  .stats-row{display:none;}
+  .mobile-nav{display:block;}
+  .content{padding-bottom:80px;}
+  .toast{bottom:88px;right:10px;left:10px;}
+  .demo-banner{display:none;}
+  .topbar{padding:11px 14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div class="ob-overlay" id="obOverlay">
+  <div class="ob-card">
+    <div class="ob-track">
+      <div class="ob-steps" id="obSteps">
+        <div class="ob-step">
+          <div class="ob-icon">📦</div>
+          <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+          <h2>Welcome to Skanera</h2>
+          <p>Never dig through a box again. Skanera turns your storage chaos into a searchable, organized inventory powered by AI.</p>
+          <div class="ob-actions"><button class="ob-skip" onclick="skipOB()">Skip intro</button><button class="ob-next" onclick="goStep(1)">Next &rarr;</button></div>
+        </div>
+        <div class="ob-step">
+          <div class="ob-icon">📷</div>
+          <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+          <h2>Photograph your items</h2>
+          <p>Open a box, snap photos of what's inside. Our AI instantly identifies each item and labels it automatically — no typing needed.</p>
+          <div class="ob-actions"><button class="ob-skip" onclick="skipOB()">Skip</button><button class="ob-next" onclick="goStep(2)">Next &rarr;</button></div>
+        </div>
+        <div class="ob-step">
+          <div class="ob-icon">🔲</div>
+          <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div></div>
+          <h2>Print a QR sticker</h2>
+          <p>Generate a QR code for each box and print it on sticker paper. Stick it on the outside — scan it anytime to see everything inside.</p>
+          <div class="ob-actions"><button class="ob-skip" onclick="skipOB()">Skip</button><button class="ob-next" onclick="goStep(3)">Next &rarr;</button></div>
+        </div>
+        <div class="ob-step">
+          <div class="ob-icon">🔍</div>
+          <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div></div>
+          <h2>Find anything instantly</h2>
+          <p>Search across every box at once. Type any item name and Skanera tells you exactly which box and where it is.</p>
+          <div class="ob-actions"><button class="ob-skip" style="visibility:hidden">.</button><button class="ob-next" onclick="skipOB()" style="background:var(--success);color:#fff">Get Started &#10003;</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEMO BANNER -->
+<div class="demo-banner">
+  <div class="demo-banner-text"><span class="demo-badge">Demo Mode</span> Click a step to see Skanera in action</div>
+  <div class="demo-steps">
+    <button class="demo-step-btn" onclick="demoStep('search',this)">🔍 Search</button>
+    <button class="demo-step-btn" onclick="demoStep('add',this)">➕ Add Box</button>
+    <button class="demo-step-btn" onclick="demoStep('qr',this)">🔲 QR Code</button>
+    <button class="demo-step-btn" onclick="demoStep('report',this)">📋 Insurance Report</button>
+    <button class="demo-step-btn" onclick="demoStep('share',this)">🔗 Share Box</button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Skaner<span>a</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="openReport()">📋 Report</button>
+    <button class="btn btn-ghost btn-sm" onclick="openQRModal(null,true)">🖨 QR</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddBox()">+ New Box</button>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder='Search all boxes… e.g. "plastic forks"' oninput="handleSearch(this.value)" onblur="setTimeout(()=>closeSearch(),200)">
+    <span class="search-icon">🔍</span>
+    <div class="search-results" id="searchResults" style="display:none"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="sidebar">
+    <h3>Locations</h3>
+    <div id="locationsList"></div>
+    <button class="add-location-btn" onclick="addLocation()">+ Add location</button>
+  </div>
+  <div class="content">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="content-header">
+      <h2 id="contentTitle">All Boxes</h2>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-ghost btn-sm" onclick="openReport()">📋 Insurance Report</button>
+        <button class="btn btn-ghost btn-sm" onclick="openAddBox()">+ Add Box</button>
+      </div>
+    </div>
+    <div class="boxes-grid" id="boxesGrid"></div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mob-nav-btn active" onclick="filterByLocation('all');setMobNav(this)"><span class="nav-icon">📦</span>Boxes</button>
+    <button class="mob-nav-btn" onclick="openAddBox()"><span class="nav-icon">➕</span>Add</button>
+    <button class="mob-nav-btn" onclick="focusSearch()"><span class="nav-icon">🔍</span>Search</button>
+    <button class="mob-nav-btn" onclick="openReport()"><span class="nav-icon">📋</span>Report</button>
+    <button class="mob-nav-btn" onclick="openQRModal(null,true)"><span class="nav-icon">🔲</span>QR</button>
+  </div>
+</div>
+
+<!-- ADD/EDIT BOX MODAL -->
+<div class="modal-overlay" id="addBoxModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modalTitle">New Box</h3><button class="modal-close" onclick="closeModal('addBoxModal')">&#215;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Box Name</label><input type="text" id="boxName" placeholder="e.g. Party Supplies, Winter Clothes&hellip;"></div>
+      <div class="form-group"><label>Location</label><select id="boxLocation"><option value="">Select location&hellip;</option></select></div>
+      <div class="form-group"><label>Label / Number (optional)</label><input type="text" id="boxLabel" placeholder="e.g. White bin #3, Blue tote&hellip;"></div>
+      <div class="form-group">
+        <label>Add Items &mdash; Upload Photos</label>
+        <div class="photo-upload"><input type="file" accept="image/*" multiple onchange="handlePhotoUpload(event)" id="fileInput">
+          <div class="photo-upload-icon">📷</div>
+          <p><strong>Click to upload</strong> or take a photo</p>
+          <p style="margin-top:4px">AI will automatically identify each item</p>
+        </div>
+        <div id="aiStatus"></div>
+        <div class="items-list" id="itemsList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addBoxModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBox()">Save Box</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOX DETAIL MODAL -->
+<div class="modal-overlay" id="boxDetailModal">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div><h3 id="detailBoxName"></h3><div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="detailBoxLocation"></div></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="openShare()">🔗 Share</button>
+        <button class="btn btn-ghost btn-sm" onclick="editCurrentBox()">✏️ Edit</button>
+        <button class="qr-btn" onclick="openQRFromDetail()">🔲 QR</button>
+        <button class="modal-close" onclick="closeModal('boxDetailModal')">&#215;</button>
+      </div>
+    </div>
+    <div class="modal-body"><div class="box-detail-items" id="detailItemsGrid"></div></div>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+<div class="modal-overlay" id="qrModal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header"><h3>QR Code Label</h3><button class="modal-close" onclick="closeModal('qrModal')">&#215;</button></div>
+    <div class="modal-body">
+      <div class="qr-container">
+        <div class="qr-info" id="qrInfo"></div>
+        <div class="qr-box" id="qrcode"></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:13px">Print on sticker paper and attach to your box. Scan to view contents.</div>
+        <button class="qr-print-btn" onclick="printQR()">🖨 Print Label</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h3>🔗 Share Box</h3><button class="modal-close" onclick="closeModal('shareModal')">&#215;</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:5px">Share this box inventory with family members. Anyone with the link can view the contents.</p>
+      <div class="share-link-box">
+        <input type="text" id="shareLinkInput" readonly>
+        <button class="share-copy-btn" onclick="copyLink()">Copy</button>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:9px">Share via</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="shareVia('sms')">💬 Text</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareVia('email')">📧 Email</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareVia('whatsapp')">💚 WhatsApp</button>
+        </div>
+      </div>
+      <div style="margin-top:13px;padding:11px;background:var(--surface2);border-radius:9px;font-size:11px;color:var(--text-muted)">
+        💡 <strong style="color:var(--text)">Premium feature</strong> &mdash; Shared links let family members view box contents without an account.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSURANCE REPORT MODAL -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header"><h3>📋 Insurance Inventory Report</h3><button class="modal-close" onclick="closeModal('reportModal')">&#215;</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:13px">A complete photo-verified inventory of your belongings for insurance documentation.</p>
+      <div class="report-preview" id="reportContent"></div>
+      <button class="report-print-btn" onclick="printReport()">🖨 Print / Save as PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+var state = {
+  boxes: [],
+  locations: [
+    {id:"loc1",name:"Basement Storage",color:"#f5c842"},
+    {id:"loc2",name:"Garage Shelf",color:"#4caf82"},
+    {id:"loc3",name:"Main Floor Closet",color:"#e8855a"},
+    {id:"loc4",name:"Attic",color:"#a89bff"}
+  ],
+  filterLocation:"all", editingBoxId:null, viewingBoxId:null, currentItems:[]
+};
+
+state.boxes = [
+  {id:"b1",name:"Party Supplies",locationId:"loc1",label:"White bin #1",items:[
+    {id:"i1",name:"Plastic forks & spoons",emoji:"🍴",photo:null},
+    {id:"i2",name:"Paper plates",emoji:"🍽️",photo:null},
+    {id:"i3",name:"Balloons",emoji:"🎈",photo:null},
+    {id:"i4",name:"Streamers",emoji:"🎉",photo:null},
+    {id:"i5",name:"Cake candles",emoji:"🕯️",photo:null}
+  ]},
+  {id:"b2",name:"Winter Clothes",locationId:"loc1",label:"White bin #2",items:[
+    {id:"i6",name:"Wool sweaters",emoji:"🧥",photo:null},
+    {id:"i7",name:"Scarves",emoji:"🧣",photo:null},
+    {id:"i8",name:"Winter gloves",emoji:"🧤",photo:null},
+    {id:"i9",name:"Winter boots",emoji:"👢",photo:null}
+  ]},
+  {id:"b3",name:"Tools & Hardware",locationId:"loc2",label:"Shelf A",items:[
+    {id:"i10",name:"Hammer",emoji:"🔨",photo:null},
+    {id:"i11",name:"Screwdrivers set",emoji:"🪛",photo:null},
+    {id:"i12",name:"Nails & screws",emoji:"🔩",photo:null},
+    {id:"i13",name:"Measuring tape",emoji:"📏",photo:null}
+  ]},
+  {id:"b4",name:"Holiday Decorations",locationId:"loc3",label:"Top shelf",items:[
+    {id:"i14",name:"Christmas lights",emoji:"✨",photo:null},
+    {id:"i15",name:"Ornaments",emoji:"🎄",photo:null},
+    {id:"i16",name:"Halloween decorations",emoji:"🎃",photo:null},
+    {id:"i17",name:"Advent calendar",emoji:"📅",photo:null}
+  ]},
+  {id:"b5",name:"Kids Toys",locationId:"loc1",label:"Blue bin",items:[
+    {id:"i18",name:"LEGO sets",emoji:"🧱",photo:null},
+    {id:"i19",name:"Board games",emoji:"🎲",photo:null},
+    {id:"i20",name:"Stuffed animals",emoji:"🧸",photo:null}
+  ]},
+  {id:"b6",name:"Sports Equipment",locationId:"loc2",label:"Shelf B",items:[
+    {id:"i21",name:"Hockey sticks",emoji:"🏒",photo:null},
+    {id:"i22",name:"Soccer ball",emoji:"⚽",photo:null},
+    {id:"i23",name:"Knee pads",emoji:"🦵",photo:null}
+  ]}
+];
+
+function goStep(n){ document.getElementById("obSteps").style.transform="translateX(-"+n*100+"%)"; }
+function skipOB(){ var o=document.getElementById("obOverlay"); o.classList.add("hidden"); setTimeout(function(){o.style.display="none";},400); }
+
+function demoStep(step,btn){
+  document.querySelectorAll(".demo-step-btn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  skipOB();
+  if(step==="search"){ var inp=document.getElementById("searchInput"); inp.focus(); inp.value="Christmas lights"; handleSearch("Christmas lights"); showToast("🔍 Search for any item across all boxes!"); }
+  else if(step==="add"){ openAddBox(); showToast("➕ Create a box and add items by photo!"); }
+  else if(step==="qr"){ openQRModal("b1"); showToast("🔲 Generate and print QR labels for any box!"); }
+  else if(step==="report"){ openReport(); showToast("📋 Generate a full insurance inventory report!"); }
+  else if(step==="share"){ state.viewingBoxId="b1"; openShare(); showToast("🔗 Share any box with family via link!"); }
+}
+
+function render(){ renderLocations(); renderBoxes(); renderStats(); }
+
+function renderLocations(){
+  var el=document.getElementById("locationsList");
+  var all="<div class=\"location-item "+(state.filterLocation==="all"?"active":"")+"\" onclick=\"filterByLocation('all')\"><span class=\"location-dot\" style=\"background:#7e7d8f\"></span> All Boxes<span style=\"margin-left:auto;font-size:10px;opacity:0.6\">"+state.boxes.length+"</span></div>";
+  var locs=state.locations.map(function(l){
+    var count=state.boxes.filter(function(b){return b.locationId===l.id;}).length;
+    return "<div class=\"location-item "+(state.filterLocation===l.id?"active":"")+"\" onclick=\"filterByLocation('"+l.id+"')\"><span class=\"location-dot\" style=\"background:"+l.color+"\"></span> "+l.name+"<span style=\"margin-left:auto;font-size:10px;opacity:0.6\">"+count+"</span></div>";
+  }).join("");
+  el.innerHTML=all+locs;
+}
+
+function renderStats(){
+  var total=state.boxes.reduce(function(s,b){return s+b.items.length;},0);
+  document.getElementById("statsRow").innerHTML='<div class="stat-card"><div class="stat-num">'+state.boxes.length+'</div><div class="stat-label">Boxes</div></div><div class="stat-card"><div class="stat-num">'+total+'</div><div class="stat-label">Items Tracked</div></div><div class="stat-card"><div class="stat-num">'+state.locations.length+'</div><div class="stat-label">Locations</div></div><div class="stat-card"><div class="stat-num" style="color:var(--success)">AI</div><div class="stat-label">Powered</div></div>';
+}
+
+function renderBoxes(){
+  var filtered=state.filterLocation==="all"?state.boxes:state.boxes.filter(function(b){return b.locationId===state.filterLocation;});
+  var title=state.filterLocation==="all"?"All Boxes":((state.locations.find(function(l){return l.id===state.filterLocation;})||{name:"All Boxes"}).name);
+  document.getElementById("contentTitle").textContent=title;
+  var grid=document.getElementById("boxesGrid");
+  if(!filtered.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📦</div><h3>No boxes here yet</h3><p style="margin:7px 0 16px">Add a box and photograph its contents</p><button class="btn btn-primary" onclick="openAddBox()">+ Add First Box</button></div>';return;}
+  grid.innerHTML=filtered.map(function(box){return renderBoxCard(box);}).join("");
+}
+
+function renderBoxCard(box){
+  var loc=state.locations.find(function(l){return l.id===box.locationId;});
+  var chips=box.items.slice(0,4).map(function(i){return '<div class="item-chip">'+(i.emoji||"📦")+" "+i.name+"</div>";}).join("");
+  var more=box.items.length>4?'<div class="item-chip">+'+(box.items.length-4)+" more</div>":"";
+  return "<div class=\"box-card\" onclick=\"openBoxDetail('"+box.id+"')\"><div class=\"box-card-header\"><div><div class=\"box-name\">"+box.name+"</div>"+(box.label?"<div class=\"box-location\">📦 "+box.label+"</div>":"")+"</div>"+(loc?"<span class=\"location-badge\" style=\"color:"+loc.color+";background:"+loc.color+"18\">"+loc.name+"</span>":"")+"</div><div class=\"box-items-preview\">"+chips+more+(!box.items.length?"<span style=\"color:var(--text-muted);font-size:11px\">No items yet</span>":"")+"</div><div class=\"box-card-footer\"><span class=\"item-count\">"+box.items.length+" item"+(box.items.length!==1?"s":"")+"</span><button class=\"qr-btn\" onclick=\"event.stopPropagation();openQRModal('"+box.id+"')\">🔲 QR</button></div></div>";
+}
+
+function handleSearch(val){
+  var el=document.getElementById("searchResults");
+  if(!val.trim()){el.style.display="none";return;}
+  var q=val.toLowerCase(); var results=[];
+  state.boxes.forEach(function(box){
+    box.items.forEach(function(item){
+      if(item.name.toLowerCase().indexOf(q)!==-1){var loc=state.locations.find(function(l){return l.id===box.locationId;});results.push({item:item,box:box,loc:loc});}
+    });
+  });
+  if(!results.length){el.innerHTML='<div class="no-results">No items found matching "<strong>'+val+'"</strong></div>';}
+  else{el.innerHTML=results.slice(0,8).map(function(r){return "<div class=\"search-result-item\" onclick=\"openBoxDetail('"+r.box.id+"');closeSearch()\"><span style=\"font-size:22px\">"+(r.item.emoji||"📦")+"</span><div class=\"sr-info\"><div class=\"sr-item-name\">"+r.item.name+"</div><div class=\"sr-box\">📦 "+r.box.name+(r.box.label?" · "+r.box.label:"")+"</div></div><div class=\"sr-location\">"+(r.loc?r.loc.name:"")+"</div></div>";}).join("");}
+  el.style.display="block";
+}
+function closeSearch(){document.getElementById("searchResults").style.display="none";}
+function filterByLocation(id){state.filterLocation=id;render();}
+function focusSearch(){document.getElementById("searchInput").focus();window.scrollTo({top:0,behavior:"smooth"});}
+function setMobNav(btn){document.querySelectorAll(".mob-nav-btn").forEach(function(b){b.classList.remove("active");});btn.classList.add("active");}
+
+function openAddBox(){
+  state.editingBoxId=null;state.currentItems=[];
+  document.getElementById("boxName").value="";document.getElementById("boxLabel").value="";document.getElementById("boxLocation").value="";
+  document.getElementById("itemsList").innerHTML="";document.getElementById("aiStatus").innerHTML="";
+  document.getElementById("modalTitle").textContent="New Box";
+  populateLocationSelect();openModal("addBoxModal");
+}
+
+function editCurrentBox(){
+  closeModal("boxDetailModal");
+  var box=state.boxes.find(function(b){return b.id===state.viewingBoxId;});if(!box)return;
+  state.editingBoxId=box.id;state.currentItems=box.items.map(function(i){return Object.assign({},i);});
+  document.getElementById("boxName").value=box.name;document.getElementById("boxLabel").value=box.label||"";
+  document.getElementById("modalTitle").textContent="Edit Box";
+  populateLocationSelect(box.locationId);renderItemsList();openModal("addBoxModal");
+}
+
+function populateLocationSelect(selected){
+  var sel=document.getElementById("boxLocation");
+  sel.innerHTML='<option value="">Select location&hellip;</option>'+state.locations.map(function(l){return '<option value="'+l.id+'"'+(selected===l.id?" selected":"")+">"+l.name+"</option>";}).join("");
+}
+
+function handlePhotoUpload(event){
+  var files=Array.from(event.target.files);if(!files.length)return;
+  document.getElementById("aiStatus").innerHTML='<div class="ai-analyzing"><div class="spinner"></div> AI is identifying items in '+files.length+" photo"+(files.length>1?"s":"")+"&hellip;</div>";
+  var promise=Promise.resolve();
+  files.forEach(function(file){
+    promise=promise.then(function(){
+      return readFileAsDataURL(file).then(function(dataUrl){
+        return identifyItemWithAI(dataUrl,file.name).then(function(aiName){
+          var emoji=getEmojiForItem(aiName);
+          state.currentItems.push({id:"item_"+Date.now()+Math.random(),name:aiName,emoji:emoji,photo:dataUrl});
+          renderItemsList();
+        });
+      });
+    });
+  });
+  promise.then(function(){
+    document.getElementById("aiStatus").innerHTML='<div style="font-size:12px;color:var(--success);padding:7px 0">&#10003; '+files.length+" item"+(files.length>1?"s":"")+" identified by AI</div>";
+    document.getElementById("fileInput").value="";
+  });
+}
+
+function readFileAsDataURL(file){return new Promise(function(res){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.readAsDataURL(file);});}
+
+function identifyItemWithAI(dataUrl,filename){
+  var base64=dataUrl.split(",")[1];var mediaType=dataUrl.split(";")[0].split(":")[1];
+  return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:60,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:mediaType,data:base64}},{type:"text",text:"What item is in this photo? Reply with ONLY a short, clear item name (2-5 words max). No punctuation, no explanation."}]}]})})
+  .then(function(r){return r.json();})
+  .then(function(data){return (data.content&&data.content[0]&&data.content[0].text&&data.content[0].text.trim())||guessFromFilename(filename);})
+  .catch(function(){return guessFromFilename(filename);});
+}
+
+function guessFromFilename(name){return name.replace(/\.[^.]+$/,"").replace(/[_-]/g," ").replace(/\w/g,function(c){return c.toUpperCase();})||"Unknown Item";}
+
+function getEmojiForItem(name){
+  var n=name.toLowerCase();
+  var map=[[["fork","spoon","knife","utensil","cutlery"],"🍴"],[["plate","dish","bowl"],"🍽️"],[["cup","mug","glass"],"🥤"],[["balloon"],"🎈"],[["candle"],"🕯️"],[["cake"],"🎂"],[["streamer","confetti","party"],"🎉"],[["sweater","hoodie","jacket","coat","shirt","clothing","clothes"],"🧥"],[["scarf"],"🧣"],[["glove","mitten"],"🧤"],[["hat","cap","toque"],"🧢"],[["boot","shoe"],"👢"],[["hammer"],"🔨"],[["screwdriver"],"🪛"],[["wrench"],"🔧"],[["nail","screw","bolt"],"🔩"],[["tape","measure"],"📏"],[["light","lamp","bulb","string","christmas"],"✨"],[["ornament","decoration","holiday","xmas"],"🎄"],[["halloween","pumpkin"],"🎃"],[["book","manual"],"📚"],[["lego","brick"],"🧱"],[["board game","game"],"🎲"],[["stuffed","teddy","bear"],"🧸"],[["tool","drill"],"🛠️"],[["cable","wire","cord","charger"],"🔌"],[["battery"],"🔋"],[["phone","tablet"],"📱"],[["camera"],"📷"],[["blanket","towel"],"🛏️"],[["sport","ball","soccer"],"⚽"],[["hockey"],"🏒"],[["bicycle","bike"],"🚲"]];
+  for(var i=0;i<map.length;i++){if(map[i][0].some(function(k){return n.indexOf(k)!==-1;}))return map[i][1];}
+  return "📦";
+}
+
+function renderItemsList(){
+  document.getElementById("itemsList").innerHTML=state.currentItems.map(function(item,i){
+    return "<div class=\"item-row\">"+(item.photo?"<img class=\"item-row-thumb\" src=\""+item.photo+"\" alt=\"\">":"<div class=\"item-row-thumb\" style=\"display:flex;align-items:center;justify-content:center;font-size:18px\">"+item.emoji+"</div>")+"<input type=\"text\" style=\"flex:1;padding:5px 8px;font-size:12px\" value=\""+escapeHtml(item.name)+"\" onchange=\"updateItemName("+i+",this.value)\"><span class=\"item-row-ai\">AI</span><button class=\"remove-item\" onclick=\"removeItem("+i+")\">&#215;</button></div>";
+  }).join("");
+}
+
+function updateItemName(i,val){state.currentItems[i].name=val;state.currentItems[i].emoji=getEmojiForItem(val);}
+function removeItem(i){state.currentItems.splice(i,1);renderItemsList();}
+
+function saveBox(){
+  var name=document.getElementById("boxName").value.trim();var locationId=document.getElementById("boxLocation").value;var label=document.getElementById("boxLabel").value.trim();
+  if(!name){showToast("Please enter a box name");return;}
+  if(state.editingBoxId){var box=state.boxes.find(function(b){return b.id===state.editingBoxId;});if(box){box.name=name;box.locationId=locationId;box.label=label;box.items=state.currentItems.slice();}}
+  else{state.boxes.push({id:"b"+Date.now(),name:name,locationId:locationId,label:label,items:state.currentItems.slice()});}
+  closeModal("addBoxModal");render();showToast(state.editingBoxId?"✓ Box updated":"✓ Box created!");
+}
+
+function openBoxDetail(id){
+  var box=state.boxes.find(function(b){return b.id===id;});if(!box)return;
+  state.viewingBoxId=id;
+  var loc=state.locations.find(function(l){return l.id===box.locationId;});
+  document.getElementById("detailBoxName").textContent=box.name;
+  document.getElementById("detailBoxLocation").innerHTML=(loc?'<span style="color:'+loc.color+'">&#9679; '+loc.name+"</span>":"")+(box.label?" &middot; "+box.label:"");
+  document.getElementById("detailItemsGrid").innerHTML=box.items.length?box.items.map(function(item){return "<div class=\"detail-item\">"+(item.photo?"<img src=\""+item.photo+"\" alt=\""+escapeHtml(item.name)+"\">":"<div style=\"height:76px;display:flex;align-items:center;justify-content:center;font-size:34px;background:var(--surface2)\">"+item.emoji+"</div>")+"<div class=\"detail-item-name\">"+escapeHtml(item.name)+"</div></div>";}).join(""):"<div style=\"grid-column:1/-1;text-align:center;color:var(--text-muted);padding:34px\">No items yet. Edit box to add items.</div>";
+  openModal("boxDetailModal");
+}
+
+function openQRFromDetail(){closeModal("boxDetailModal");openQRModal(state.viewingBoxId);}
+
+function openQRModal(boxId,selectFirst){
+  var box=boxId?state.boxes.find(function(b){return b.id===boxId;}):null;
+  if(selectFirst&&state.boxes.length)box=state.boxes[0];
+  if(!box){showToast("No box selected");return;}
+  var loc=state.locations.find(function(l){return l.id===box.locationId;});
+  document.getElementById("qrInfo").innerHTML="<strong style=\"font-size:14px\">"+box.name+"</strong><br><span style=\"color:var(--text-muted)\">"+(loc?loc.name:"No location")+(box.label?" &middot; "+box.label:"")+"</span>";
+  document.getElementById("qrcode").innerHTML="";
+  var qrData=JSON.stringify({id:box.id,name:box.name,location:loc?loc.name:null,label:box.label,items:box.items.map(function(i){return i.name;})});
+  new QRCode(document.getElementById("qrcode"),{text:qrData,width:175,height:175,colorDark:"#000",colorLight:"#fff"});
+  openModal("qrModal");
+}
+
+function printQR(){
+  var img=document.getElementById("qrcode").querySelector("img");
+  if(!img){showToast("QR not ready yet");return;}
+  var w=window.open("","_blank");
+  var html='<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fff;font-family:sans-serif"><div style="text-align:center;border:2px solid #eee;border-radius:16px;padding:28px 36px"><div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:7px">SKANERA</div>'+document.getElementById("qrInfo").innerHTML+'<br><img src="'+img.src+'" width="175" height="175" style="margin:10px 0;display:block"><div style="font-size:11px;color:#bbb">Scan to view box contents</div></div></body></html>';
+  w.document.write(html);
+  w.document.close();w.print();
+}
+
+function openShare(){
+  var box=state.boxes.find(function(b){return b.id===state.viewingBoxId;});if(!box)return;
+  closeModal("boxDetailModal");
+  var url="https://skanera.app/box/"+box.id+"?name="+encodeURIComponent(box.name)+"&items="+encodeURIComponent(box.items.map(function(i){return i.name;}).join(","));
+  document.getElementById("shareLinkInput").value=url;
+  openModal("shareModal");
+}
+
+function copyLink(){
+  var input=document.getElementById("shareLinkInput");
+  if(navigator.clipboard){navigator.clipboard.writeText(input.value).then(function(){showToast("✓ Link copied to clipboard!");});}
+  else{input.select();document.execCommand("copy");showToast("✓ Link copied!");}
+}
+
+function shareVia(method){
+  var url=document.getElementById("shareLinkInput").value;
+  var box=state.boxes.find(function(b){return b.id===state.viewingBoxId;});
+  var msg="Check out what's in my "+(box?box.name:"box")+" on Skanera: "+url;
+  if(method==="sms")window.open("sms:?body="+encodeURIComponent(msg));
+  else if(method==="email")window.open("mailto:?subject=My "+(box?box.name:"Box")+" Inventory&body="+encodeURIComponent(msg));
+  else if(method==="whatsapp")window.open("https://wa.me/?text="+encodeURIComponent(msg));
+}
+
+function openReport(){
+  var today=new Date().toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"});
+  var totalItems=state.boxes.reduce(function(s,b){return s+b.items.length;},0);
+  var html='<div class="report-header"><div><div class="report-title">Home Contents Inventory</div><div class="report-date">Generated: '+today+' &middot; Powered by Skanera</div></div><div style="text-align:right;font-size:11px;color:var(--text-muted)">'+state.boxes.length+' boxes<br>'+totalItems+' items</div></div>';
+  state.locations.forEach(function(loc){
+    var locBoxes=state.boxes.filter(function(b){return b.locationId===loc.id;});if(!locBoxes.length)return;
+    html+='<div class="report-section-title" style="color:'+loc.color+'">📍 '+loc.name+"</div>";
+    locBoxes.forEach(function(box){
+      html+='<div style="margin-bottom:9px"><div style="font-weight:700;font-size:12px;margin-bottom:4px">📦 '+box.name+(box.label?" &mdash; "+box.label:"")+"</div>";
+      box.items.forEach(function(item){html+='<div class="report-item-row"><span>'+(item.emoji||"📦")+" "+item.name+'</span><span style="color:var(--text-muted);font-size:10px">Photo verified</span></div>';});
+      html+="</div>";
+    });
+    html+='<div class="divider-line"></div>';
+  });
+  html+='<div class="report-total"><span>Total Items Documented</span><span style="color:var(--accent)">'+totalItems+" items</span></div>";
+  document.getElementById("reportContent").innerHTML=html;
+  openModal("reportModal");
+}
+
+function printReport(){
+  var content=document.getElementById("reportContent").innerHTML;
+  var today=new Date().toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"});
+  var w=window.open("","_blank");
+  var style='<style>body{font-family:sans-serif;max-width:680px;margin:36px auto;padding:0 18px;color:#111}h1{font-size:20px;margin-bottom:3px}h2{font-size:12px;color:#999;font-weight:400;margin-bottom:26px}.report-section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#666;margin:16px 0 6px}.report-item-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px}.report-item-row:last-child{border-bottom:none}.report-total{display:flex;justify-content:space-between;font-weight:700;font-size:14px;padding:12px 0;border-top:2px solid #111;margin-top:8px}.divider-line{height:1px;background:#eee;margin:10px 0}@media print{body{margin:18px}}</style>';
+  w.document.write('<html><head><title>Skanera Insurance Report</title>'+style+'</head><body><h1>Home Contents Inventory Report</h1><h2>Generated '+today+' &middot; Skanera AI-Powered Home Inventory</h2>'+content+'</body></html>');
+  w.document.close();w.print();
+}
+
+function addLocation(){
+  var name=prompt("Location name (e.g. Basement Storage, Garage Shelf):");
+  if(!name||!name.trim())return;
+  var colors=["#f5c842","#4caf82","#e8855a","#a89bff","#5ac8e8","#f08fad"];
+  state.locations.push({id:"loc"+Date.now(),name:name.trim(),color:colors[state.locations.length%colors.length]});
+  render();showToast("✓ Location added");
+}
+
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+
+function showToast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2800);}
+function escapeHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+document.querySelectorAll(".modal-overlay").forEach(function(el){el.addEventListener("click",function(e){if(e.target===el)el.classList.remove("open");});});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skanera for Business — Enterprise Inventory Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080d;--s1:#0d0f17;--s2:#121520;--s3:#181c28;--blue:#5282ff;--blue-lt:#7aa8ff;--blue-p:rgba(82,130,255,0.1);--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#f0ede8;--muted:#8892a4;--muted2:#5a6478;--green:#3ecf8e;--green-p:rgba(62,207,142,0.1);--amber:#f5a623;}
+*{box-sizing:border-box;margin:0;padding:0;}html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:66px;position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,8,13,0.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-0.3px;}
+.nav-logo .biz-tag{font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);background:var(--blue-p);border:1px solid rgba(82,130,255,0.25);padding:3px 8px;border-radius:20px;margin-left:2px;}
+.nav-links{display:flex;gap:28px;align-items:center;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.15s;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{background:var(--blue);color:#fff;padding:9px 22px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.18s;}
+.nav-cta:hover{background:var(--blue-lt);transform:translateY(-1px);box-shadow:0 4px 20px rgba(82,130,255,0.35);}
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 48px 80px;position:relative;overflow:hidden;max-width:1200px;margin:0 auto;}
+.hero-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 70% 70% at 60% 40%,black 20%,transparent 75%);pointer-events:none;z-index:0;}
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(82,130,255,0.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;}
+.hero-glow2{position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(62,207,142,0.07) 0%,transparent 70%);bottom:0;left:20%;pointer-events:none;}
+.hero-left{flex:1;max-width:620px;position:relative;z-index:1;}
+.hero-right{flex:0 0 420px;position:relative;z-index:1;margin-left:60px;}
+.h-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);background:var(--blue-p);border:1px solid rgba(82,130,255,0.2);padding:6px 14px;border-radius:6px;margin-bottom:28px;}
+.h-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(40px,4.5vw,62px);line-height:1.07;letter-spacing:-1.5px;margin-bottom:22px;font-weight:400;}
+h1 em{font-style:italic;color:var(--blue-lt);}
+h1 strong{color:var(--text);}
+.hero-p{font-size:17px;color:var(--muted);line-height:1.7;margin-bottom:36px;font-weight:300;max-width:520px;}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
+.btn-blue{padding:14px 30px;border-radius:8px;background:var(--blue);color:#fff;font-size:15px;font-weight:700;text-decoration:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
+.btn-blue:hover{background:var(--blue-lt);transform:translateY(-2px);box-shadow:0 8px 32px rgba(82,130,255,0.35);}
+.btn-ghost-b{padding:14px 30px;border-radius:8px;background:transparent;color:var(--text);border:1px solid var(--border2);font-size:15px;font-weight:600;text-decoration:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;}
+.btn-ghost-b:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04);}
+.trust-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:500;}
+.trust-div{width:1px;height:14px;background:var(--border2);}
+.demo-card{background:var(--s1);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,0.5);}
+.demo-bar{background:var(--s2);padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.d-dot{width:10px;height:10px;border-radius:50%;}
+.demo-body{padding:20px;}
+.demo-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.demo-stat{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.ds-n{font-size:24px;font-weight:700;letter-spacing:-1px;color:var(--text);font-family:'DM Serif Display',serif;}
+.ds-l{font-size:11px;color:var(--muted);margin-top:3px;font-weight:500;}
+.ds-trend{font-size:10px;font-weight:600;color:var(--green);margin-top:4px;}
+.demo-item-list{display:flex;flex-direction:column;gap:7px;}
+.d-item-row{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+.d-item-ico{font-size:18px;width:32px;height:32px;border-radius:7px;background:var(--s3);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.d-item-info{flex:1;}
+.d-item-name{font-size:13px;font-weight:600;color:var(--text);}
+.d-item-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.d-item-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;}
+.badge-verified{background:var(--green-p);color:var(--green);}
+.badge-pending{background:rgba(245,166,35,0.1);color:var(--amber);}
+.section{padding:88px 48px;max-width:1200px;margin:0 auto;}
+.s-tag{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;}
+.s-h{font-family:'DM Serif Display',serif;font-size:clamp(28px,3.5vw,46px);line-height:1.1;letter-spacing:-1px;margin-bottom:14px;max-width:560px;font-weight:400;}
+.s-p{color:var(--muted);font-size:16px;line-height:1.7;max-width:480px;margin-bottom:52px;font-weight:300;}
+.mkts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;background:var(--border);}
+.mkt{background:var(--s1);padding:36px;transition:background 0.2s;}
+.mkt:hover{background:var(--s2);}
+.mkt-ico{font-size:32px;margin-bottom:18px;}
+.mkt h3{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px;}
+.mkt p{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:18px;font-weight:300;}
+.mkt-stat{font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-p);border:1px solid rgba(82,130,255,0.2);padding:7px 12px;border-radius:6px;display:inline-block;}
+.alt-section{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:88px 48px;}
+.alt-inner{max-width:1200px;margin:0 auto;}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);margin-top:52px;}
+.how-step{background:var(--bg);padding:28px;transition:background 0.2s;}
+.how-step:hover{background:var(--s1);}
+.how-n{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--blue);margin-bottom:14px;text-transform:uppercase;}
+.how-ico{font-size:28px;margin-bottom:14px;}
+.how-step h3{font-family:'DM Serif Display',serif;font-size:17px;font-weight:400;margin-bottom:8px;}
+.how-step p{color:var(--muted);font-size:13px;line-height:1.65;font-weight:300;}
+.feat-table{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:52px;}
+.ft-head{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:var(--s2);border-bottom:1px solid var(--border);padding:14px 22px;}
+.ft-head div{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.ft-head div:last-child{color:var(--blue);}
+.ft-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:14px 22px;border-bottom:1px solid var(--border);transition:background 0.15s;align-items:center;}
+.ft-row:last-child{border-bottom:none;}
+.ft-row:hover{background:var(--s2);}
+.ft-feat{font-size:14px;font-weight:500;color:var(--text);}
+.ft-check{font-size:16px;text-align:center;}
+.check-y{color:var(--green);}
+.check-n{color:var(--muted2);}
+.check-b{color:var(--blue);}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--border);}
+.metric{background:var(--s1);padding:32px;text-align:center;}
+.metric-n{font-family:'DM Serif Display',serif;font-size:52px;font-weight:400;letter-spacing:-2px;color:var(--text);line-height:1;}
+.metric-n span{color:var(--blue);}
+.metric-l{font-size:13px;color:var(--muted);margin-top:8px;}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:52px;}
+.price-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:30px;position:relative;}
+.price-card.featured{border-color:var(--blue);background:linear-gradient(135deg,var(--s2) 0%,rgba(82,130,255,0.06) 100%);}
+.feat-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:4px;white-space:nowrap;letter-spacing:0.5px;}
+.plan-name{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.plan-price{font-family:'DM Serif Display',serif;font-size:48px;font-weight:400;letter-spacing:-2px;line-height:1;color:var(--text);}
+.plan-price sup{font-size:20px;vertical-align:super;}
+.plan-per{font-size:13px;color:var(--muted);margin:6px 0 22px;}
+.plan-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:26px;}
+.plan-list li{font-size:13.5px;display:flex;gap:9px;align-items:flex-start;color:var(--muted);}
+.plan-list li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+.plan-btn{display:block;width:100%;text-align:center;padding:12px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;transition:all 0.18s;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;}
+.pb-blue{background:var(--blue);color:#fff;}
+.pb-blue:hover{background:var(--blue-lt);}
+.pb-ghost{background:transparent;color:var(--text);border:1px solid var(--border2);}
+.pb-ghost:hover{border-color:rgba(255,255,255,0.25);}
+.demo-section{background:var(--s1);border-top:1px solid var(--border);}
+.demo-inner{max-width:1200px;margin:0 auto;padding:88px 48px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.demo-form{background:var(--s2);border:1px solid var(--border2);border-radius:16px;padding:36px;}
+.demo-form h3{font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;margin-bottom:8px;letter-spacing:-0.5px;}
+.demo-form p{color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.6;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.fg label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.fg input,.fg select{padding:11px 14px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
+.fg input:focus,.fg select:focus{border-color:var(--blue);background:rgba(82,130,255,0.05);}
+.fg input::placeholder{color:var(--muted2);}
+.fg select option{background:var(--s2);}
+.submit-btn{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.18s;margin-top:6px;}
+.submit-btn:hover{background:var(--blue-lt);transform:translateY(-1px);}
+#demoMsg{margin-top:12px;font-size:13px;color:var(--green);min-height:20px;text-align:center;}
+.demo-copy-points{display:flex;flex-direction:column;gap:14px;}
+.dcp{display:flex;align-items:flex-start;gap:12px;}
+.dcp-ico{font-size:20px;flex-shrink:0;margin-top:1px;}
+.dcp-text h4{font-size:14px;font-weight:600;margin-bottom:3px;color:var(--text);}
+.dcp-text p{font-size:13px;color:var(--muted);line-height:1.55;font-weight:300;}
+footer{background:var(--bg);border-top:1px solid var(--border);padding:32px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);}
+.f-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);text-decoration:none;}
+.f-links{display:flex;gap:22px;}
+.f-links a{color:var(--muted);text-decoration:none;transition:color 0.15s;}
+.f-links a:hover{color:var(--text);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.hero-left>*{animation:fadeUp 0.6s ease both;}
+.h-eyebrow{animation-delay:.08s;}h1{animation-delay:.18s;}.hero-p{animation-delay:.27s;}.hero-ctas{animation-delay:.35s;}.trust-row{animation-delay:.42s;}
+@media(max-width:900px){.hero{flex-direction:column;padding:100px 24px 60px;}.hero-right{margin-left:0;margin-top:40px;max-width:100%;flex:none;}.demo-inner{grid-template-columns:1fr;gap:40px;padding:60px 24px;}.ft-head,.ft-row{grid-template-columns:2fr 1fr 1fr;}.ft-head div:nth-child(3),.ft-row div:nth-child(3){display:none;}}
+@media(max-width:640px){nav{padding:0 18px;}.nav-links{display:none;}.section{padding:60px 20px;}.alt-section{padding:60px 20px;}.form-row{grid-template-columns:1fr;}footer{padding:24px 18px;flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="hero-grid"></div>
+<nav>
+  <a class="nav-logo" href="skanera-home.html">skanera <span class="biz-tag">Business</span></a>
+  <div class="nav-links">
+    <a href="#markets">Solutions</a><a href="#how">How it works</a><a href="#pricing">Pricing</a>
+    <a href="skanera-household.html">For Homeowners →</a>
+  </div>
+  <a href="#demo" class="nav-cta">Book a Demo</a>
+</nav>
+
+<div style="position:relative;overflow:hidden;">
+<div class="hero-glow"></div><div class="hero-glow2"></div>
+<div class="hero" style="position:relative;z-index:1;">
+  <div class="hero-left">
+    <div class="h-eyebrow"><span class="h-eyebrow-dot"></span> Enterprise Inventory Intelligence</div>
+    <h1>The inventory platform<br>your clients <em>need</em><br>before <strong>disaster strikes.</strong></h1>
+    <p class="hero-p">Give your policyholders or storage customers a white-label Skanera experience. Photo-verified home inventories. Faster claims. Measurable risk reduction.</p>
+    <div class="hero-ctas">
+      <a href="#demo" class="btn-blue">Book a Demo →</a>
+      <a href="#markets" class="btn-ghost-b">See Solutions</a>
+    </div>
+    <div class="trust-row">
+      <div class="trust-item">🛡️ Insurance-grade documentation</div>
+      <div class="trust-div"></div>
+      <div class="trust-item">🔒 Enterprise security</div>
+      <div class="trust-div"></div>
+      <div class="trust-item">⚡ White-label ready</div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="demo-card">
+      <div class="demo-bar">
+        <div class="d-dot" style="background:#ff6b6b"></div>
+        <div class="d-dot" style="background:#ffa94d"></div>
+        <div class="d-dot" style="background:#69db7c"></div>
+        <span style="flex:1;text-align:center;font-size:11px;color:var(--muted)">YourBrand Inventory Portal</span>
+      </div>
+      <div class="demo-body">
+        <div class="demo-stat-row">
+          <div class="demo-stat"><div class="ds-n">2,841</div><div class="ds-l">Active Policies</div><div class="ds-trend">↑ 12% this month</div></div>
+          <div class="demo-stat"><div class="ds-n">94%</div><div class="ds-l">Documented</div><div class="ds-trend">↑ from 61%</div></div>
+          <div class="demo-stat"><div class="ds-n">3.2×</div><div class="ds-l">Faster Claims</div><div class="ds-trend">vs. undocumented</div></div>
+        </div>
+        <div class="demo-item-list">
+          <div class="d-item-row"><div class="d-item-ico">📦</div><div class="d-item-info"><div class="d-item-name">Policy #ON-48291 — Johnson</div><div class="d-item-meta">47 items · 3 locations · Last updated 2d ago</div></div><span class="d-item-badge badge-verified">✓ Verified</span></div>
+          <div class="d-item-row"><div class="d-item-ico">📦</div><div class="d-item-info"><div class="d-item-name">Policy #ON-48305 — Patel</div><div class="d-item-meta">23 items · 2 locations · Last updated 5d ago</div></div><span class="d-item-badge badge-verified">✓ Verified</span></div>
+          <div class="d-item-row"><div class="d-item-ico">📦</div><div class="d-item-info"><div class="d-item-name">Policy #ON-48318 — Chen</div><div class="d-item-meta">0 items · Awaiting documentation</div></div><span class="d-item-badge badge-pending">⏳ Pending</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+<div class="metrics">
+  <div class="metric"><div class="metric-n" style="font-size:32px;padding-top:8px">Photo<span>verified</span></div><div class="metric-l">Every item documented with AI-identified photos</div></div>
+  <div class="metric"><div class="metric-n" style="font-size:32px;padding-top:8px">White<span>label</span></div><div class="metric-l">Fully branded under your company name</div></div>
+  <div class="metric"><div class="metric-n">$0</div><div class="metric-l">Setup cost — white-label deployment included</div></div>
+  <div class="metric"><div class="metric-n">48<span>h</span></div><div class="metric-l">Average time to deploy to your customer base</div></div>
+</div>
+</div>
+
+<div id="markets"><div class="section">
+  <div class="s-tag">Solutions</div>
+  <div class="s-h">Built for two high-value verticals</div>
+  <p class="s-p">Skanera serves insurance companies and storage facility operators — the two industries that benefit most from documented, photo-verified home inventories.</p>
+  <div class="mkts">
+    <div class="mkt"><div class="mkt-ico">🛡️</div><h3>Insurance Companies</h3><p>Offer Skanera to policyholders as a value-added service. Photo-documented inventories mean faster, fairer claims — reducing fraud and dispute costs while improving customer satisfaction.</p><p style="margin-bottom:18px;color:var(--muted);font-size:13px;font-weight:300">Ideal for: home insurance, renters insurance, contents coverage, storage unit riders.</p><div class="mkt-stat">Per-policy licensing · Volume discounts available</div></div>
+    <div class="mkt"><div class="mkt-ico">🏢</div><h3>Storage Facilities</h3><p>White-label Skanera under your brand and offer it to customers storing belongings in your facility. Increase unit utilisation, reduce disputes, and differentiate your service.</p><p style="margin-bottom:18px;color:var(--muted);font-size:13px;font-weight:300">Ideal for: self-storage, climate-controlled storage, moving & storage companies.</p><div class="mkt-stat">Per-unit pricing · Full white-label included</div></div>
+    <div class="mkt"><div class="mkt-ico">🏘️</div><h3>Property Management</h3><p>Equip tenants with Skanera as part of their move-in package. Documented inventories protect both landlords and renters, reduce move-out disputes, and add a tangible perk.</p><p style="margin-bottom:18px;color:var(--muted);font-size:13px;font-weight:300">Ideal for: residential property managers, condo corporations, student housing.</p><div class="mkt-stat">Per-tenant pricing · API integration available</div></div>
+  </div>
+</div></div>
+
+<div class="alt-section" id="how"><div class="alt-inner">
+  <div class="s-tag">Deployment</div>
+  <div class="s-h">Up and running in 48 hours</div>
+  <p class="s-p">No engineering resources required on your side. We handle setup, white-labelling, and onboarding.</p>
+  <div class="how-grid">
+    <div class="how-step"><div class="how-n">Step 01</div><div class="how-ico">🤝</div><h3>Sign Agreement</h3><p>Enterprise licensing agreement signed. Volume pricing locked in based on your customer base size.</p></div>
+    <div class="how-step"><div class="how-n">Step 02</div><div class="how-ico">🎨</div><h3>White-Label Setup</h3><p>We apply your brand — logo, colours, domain. Your customers never see the Skanera name unless you want them to.</p></div>
+    <div class="how-step"><div class="how-n">Step 03</div><div class="how-ico">📨</div><h3>Customer Invitation</h3><p>We provide email templates and onboarding flows. You send — or we can help. Customers are guided to document their belongings.</p></div>
+    <div class="how-step"><div class="how-n">Step 04</div><div class="how-ico">📊</div><h3>Dashboard & Reporting</h3><p>Your admin portal shows documentation rates, completion stats, and inventory summaries across your entire customer base.</p></div>
+  </div>
+</div></div>
+
+<div class="section">
+  <div class="s-tag">Capabilities</div>
+  <div class="s-h">Everything enterprise clients need</div>
+  <div class="feat-table">
+    <div class="ft-head"><div>Feature</div><div style="text-align:center">Starter</div><div style="text-align:center">Professional</div><div style="text-align:center">Enterprise</div></div>
+    <div class="ft-row"><div class="ft-feat">AI-powered item identification</div><div class="ft-check check-y">✓</div><div class="ft-check check-y">✓</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">QR code label generation</div><div class="ft-check check-y">✓</div><div class="ft-check check-y">✓</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">Photo-verified inventory reports</div><div class="ft-check check-n">—</div><div class="ft-check check-y">✓</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">White-label branding</div><div class="ft-check check-n">—</div><div class="ft-check check-y">✓</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">Admin dashboard & reporting</div><div class="ft-check check-n">—</div><div class="ft-check check-y">✓</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">API integration</div><div class="ft-check check-n">—</div><div class="ft-check check-n">—</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">Custom data retention policy</div><div class="ft-check check-n">—</div><div class="ft-check check-n">—</div><div class="ft-check check-b">✓</div></div>
+    <div class="ft-row"><div class="ft-feat">Dedicated account manager</div><div class="ft-check check-n">—</div><div class="ft-check check-n">—</div><div class="ft-check check-b">✓</div></div>
+  </div>
+</div>
+
+<div style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);" id="pricing"><div class="section">
+  <div class="s-tag">Pricing</div>
+  <div class="s-h">Transparent B2B pricing</div>
+  <p class="s-p">No surprise fees. Volume pricing available for larger deployments.</p>
+  <div class="price-grid">
+    <div class="price-card"><div class="plan-name">Starter</div><div class="plan-price"><sup>$</sup>299</div><div class="plan-per">per month · up to 500 customers</div><ul class="plan-list"><li>Up to 500 end users</li><li>AI item recognition</li><li>Photo inventory reports</li><li>Basic admin dashboard</li><li>Email support</li></ul><button class="plan-btn pb-ghost">Get Started</button></div>
+    <div class="price-card featured"><div class="feat-badge">MOST POPULAR</div><div class="plan-name">Professional</div><div class="plan-price"><sup>$</sup>799</div><div class="plan-per">per month · up to 2,500 customers</div><ul class="plan-list"><li>Up to 2,500 end users</li><li>Full white-label branding</li><li>Advanced admin dashboard</li><li>Exportable claim reports</li><li>Onboarding email flows</li><li>Priority support</li></ul><button class="plan-btn pb-blue">Book a Demo</button></div>
+    <div class="price-card"><div class="plan-name">Enterprise</div><div class="plan-price" style="font-size:34px;letter-spacing:-1px">Custom</div><div class="plan-per">Unlimited customers · Custom contract</div><ul class="plan-list"><li>Unlimited end users</li><li>Full API access</li><li>Custom integrations</li><li>SLA guarantee</li><li>Dedicated account manager</li></ul><button class="plan-btn pb-ghost">Contact Sales</button></div>
+  </div>
+</div></div>
+
+<div class="demo-section" id="demo"><div class="demo-inner">
+  <div class="demo-copy">
+    <div class="s-tag">Book a Demo</div>
+    <div class="s-h">See Skanera in your brand in 30 minutes</div>
+    <p>We'll walk you through a live demo, show you how white-labelling works, and build a custom pricing proposal for your customer base size.</p>
+    <div class="demo-copy-points">
+      <div class="dcp"><span class="dcp-ico">⚡</span><div class="dcp-text"><h4>Fast deployment</h4><p>From signed agreement to live with your customers in under 48 hours.</p></div></div>
+      <div class="dcp"><span class="dcp-ico">🔒</span><div class="dcp-text"><h4>Enterprise security</h4><p>SOC 2-ready infrastructure. Data residency options for Canadian clients.</p></div></div>
+      <div class="dcp"><span class="dcp-ico">📊</span><div class="dcp-text"><h4>Measurable ROI</h4><p>We share benchmarks on claims processing speed and customer satisfaction improvements.</p></div></div>
+    </div>
+  </div>
+  <div class="demo-form">
+    <h3>Request a Demo</h3>
+    <p>We'll be in touch within one business day.</p>
+    <form action="https://formspree.io/f/myknkdro" method="POST" onsubmit="handleDemo()">
+      <div class="form-row">
+        <div class="fg"><label>First Name</label><input type="text" name="first_name" placeholder="Jane" required></div>
+        <div class="fg"><label>Last Name</label><input type="text" name="last_name" placeholder="Smith" required></div>
+      </div>
+      <div class="fg"><label>Work Email</label><input type="email" name="email" id="demoEmail" placeholder="jane@company.com" required></div>
+      <div class="fg"><label>Company</label><input type="text" name="company" placeholder="Intact Insurance, Dymon Storage…" required></div>
+      <div class="fg"><label>Industry</label>
+        <select name="industry"><option value="">Select your industry…</option><option>Insurance — Home & Contents</option><option>Self-Storage Facility</option><option>Property Management</option><option>Moving & Storage</option><option>Other</option></select>
+      </div>
+      <div class="fg"><label>Approx. Customer Base Size</label>
+        <select name="customer_base"><option value="">Select range…</option><option>Under 500</option><option>500 – 2,500</option><option>2,500 – 10,000</option><option>10,000+</option></select>
+      </div>
+      <button class="submit-btn" type="submit">Request My Demo →</button>
+      <div id="demoMsg"></div>
+    </form>
+  </div>
+</div></div>
+
+<footer>
+  <a href="skanera-home.html" class="f-logo">skanera.</a>
+  <div class="f-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Security</a><a href="skanera-household.html">For Homeowners</a></div>
+  <div>© 2025 Skanera Inc.</div>
+</footer>
+<script>
+function handleDemo(){
+  setTimeout(()=>{
+    document.getElementById('demoMsg').textContent = "✓ Request received! We'll reach out within one business day.";
+  }, 400);
+}
+</script>
+</body>
+</html>
