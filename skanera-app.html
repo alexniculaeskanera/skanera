@@ -634,8 +634,13 @@ function openQRModal(boxId,selectFirst){
 function printQR(){
   var img=document.getElementById("qrcode").querySelector("img");
   if(!img){showToast("QR not ready yet");return;}
+  var box=state.boxes.find(function(b){return b.id===state.viewingBoxId;})||state.boxes[0];
+  var loc=box?state.locations.find(function(l){return l.id===box.locationId;}):null;
   var w=window.open("","_blank");
-  var html='<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fff;font-family:sans-serif"><div style="text-align:center;border:2px solid #eee;border-radius:16px;padding:28px 36px"><div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:7px">SKANERA</div>'+document.getElementById("qrInfo").innerHTML+'<br><img src="'+img.src+'" width="175" height="175" style="margin:10px 0;display:block"><div style="font-size:11px;color:#bbb">Scan to view box contents</div></div></body></html>';
+  var boxName=box?box.name:"";
+  var boxLabel=box&&box.label?box.label:"";
+  var locName=loc?loc.name:"";
+  var html='<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fff;font-family:sans-serif"><div style="text-align:center;border:2px solid #eee;border-radius:16px;padding:28px 36px;max-width:280px"><div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#bbb;margin-bottom:14px">SKANERA</div><img src="'+img.src+'" width="200" height="200" style="display:block;margin:0 auto"><div style="margin-top:16px;padding-top:16px;border-top:1.5px solid #eee"><div style="font-size:20px;font-weight:700;color:#2d2318;letter-spacing:-0.5px;margin-bottom:4px">'+boxName+'</div>'+(boxLabel?'<div style="font-size:13px;color:#8a7a6e;margin-bottom:3px">'+boxLabel+'</div>':'')+(locName?'<div style="font-size:12px;color:#c96a3a;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:6px">📍 '+locName+'</div>':'')+'</div><div style="font-size:10px;color:#ccc;margin-top:14px">Scan to view all contents</div></div></body></html>';
   w.document.write(html);
   w.document.close();w.print();
 }
