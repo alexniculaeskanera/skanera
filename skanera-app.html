@@ -270,6 +270,7 @@ select option{background:var(--surface2);}
 <div class="topbar">
   <div class="logo">Skaner<span>a</span></div>
   <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="exportData()" title="Backup your data">💾 Backup</button>
     <button class="btn btn-ghost btn-sm" onclick="openReport()">📋 Report</button>
     <button class="btn btn-ghost btn-sm" onclick="openQRModal(null,true)">🖨 QR</button>
     <button class="btn btn-primary btn-sm" onclick="openAddBox()">+ New Box</button>
@@ -604,7 +605,7 @@ function saveBox(){
   if(!name){showToast("Please enter a box name");return;}
   if(state.editingBoxId){var box=state.boxes.find(function(b){return b.id===state.editingBoxId;});if(box){box.name=name;box.locationId=locationId;box.label=label;box.items=state.currentItems.slice();}}
   else{state.boxes.push({id:"b"+Date.now(),name:name,locationId:locationId,label:label,items:state.currentItems.slice()});}
-  closeModal("addBoxModal");render();showToast(state.editingBoxId?"✓ Box updated":"✓ Box created!");
+  closeModal("addBoxModal");saveToStorage();render();showToast(state.editingBoxId?"✓ Box updated":"✓ Box created!");
 }
 
 function openBoxDetail(id){
@@ -701,7 +702,7 @@ function addLocation(){
   if(!name||!name.trim())return;
   var colors=["#f5c842","#4caf82","#e8855a","#a89bff","#5ac8e8","#f08fad"];
   state.locations.push({id:"loc"+Date.now(),name:name.trim(),color:colors[state.locations.length%colors.length]});
-  render();showToast("✓ Location added");
+  saveToStorage();render();showToast("✓ Location added");
 }
 
 function openModal(id){document.getElementById(id).classList.add("open");}
